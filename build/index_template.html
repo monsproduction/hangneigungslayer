@@ -1,0 +1,1066 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hangneigungslayer für Garmin Uhren</title>
+<meta name="description" content="Hangneigungskarte für Skitouren als Kartendatei für Garmin Uhren mit Kartennavigation. Potenzielles Lawinengelände ab 30 Grad, offline am Handgelenk.">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-96.png" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS
+   Sandpapier mit Sepia-Höhenlinien. Bewusst einthemig: die Seite
+   soll wie eine gedruckte topografische Karte wirken, deshalb kein
+   Dark-Mode-Gegenstück. Alle Farben werden explizit gesetzt.
+   ============================================================ */
+:root{
+  color-scheme: light;
+
+  --sand: #E9E0CD;
+  --sand-raised: #F5EFE2;
+  --sand-sunken: #DCD1B6;
+  --sand-deep: #CFC1A0;
+
+  --ink: #2B2721;
+  --ink-soft: #6C6454;
+  --ink-faint: #8B8271;
+  --line: #D0C3A5;
+  --line-strong: #B8A886;
+
+  /* Hangneigungsklassen. Nur für Daten, nie als Dekor. */
+  --slope-1: #F1E50B;
+  --slope-2: #F26F23;
+  --slope-3: #DD055B;
+  --slope-4: #C78ABB;
+  --slope-5: #4A4A4A;
+
+  /* Einziger Akzent. Warm, damit er gegen die blauen Regionen steht. */
+  --accent: #A34724;
+  --accent-deep: #86381A;
+  --accent-ink: #FBF6EC;
+
+  /* Je Land eine eigene, kontrastreiche Flaechenfarbe statt Blautoenen -
+     bewusst quer durch den Farbkreis gewaehlt, damit die fuenf Laender auf
+     einen Blick auseinanderzuhalten sind. Fallback nur, falls ein Land ohne
+     Farbzuordnung vorkaeme. */
+  --map-fill-fallback: #8A7F6E;
+  /* Regionsgrenzen als abgedunkelte Linie, NICHT in der Hintergrundfarbe.
+     Sandfarbene Grenzen waren nicht von einer Luecke zu unterscheiden: jede
+     Linie, die durch Vereinfachungsunterschiede etwas breiter geriet, sah aus
+     wie eine Stelle ohne Farbe. Eine halbtransparente dunkle Linie kann diesen
+     Eindruck gar nicht erst erzeugen und wirkt auf allen fuenf Laenderfarben. */
+  --map-stroke: rgba(43,39,33,.34);
+
+  --topo-bg: __TOPO_BG_SAND__;
+
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Sans 3", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+  --radius-s: 2px;
+  --radius-m: 4px;
+
+  --measure: 68ch;
+}
+
+/* ============================================================
+   RESET / BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;}
+}
+body{
+  margin:0;
+  background-color:var(--sand);
+  background-image:var(--topo-bg);
+  background-repeat:repeat;
+  background-size:1050px 750px;
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;max-width:100%;}
+a{color:inherit;}
+p{margin:0;}
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+::selection{background:var(--accent);color:var(--accent-ink);}
+
+h1,h2,h3,h4{
+  font-family:var(--font-display);
+  font-weight:600;
+  margin:0;
+  text-wrap:balance;
+  color:var(--ink);
+  letter-spacing:-.017em;
+}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+@media (max-width:600px){.wrap{padding:0 20px;}}
+
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  margin-bottom:14px;
+}
+
+.prose{max-width:var(--measure);}
+.prose p + p{margin-top:16px;}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.site-nav{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb, var(--sand) 92%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.site-nav .inner{
+  position:relative;
+  max-width:1080px;margin:0 auto;padding:0 28px;
+  height:62px;display:flex;align-items:center;gap:26px;
+}
+@media (max-width:600px){.site-nav .inner{padding:0 20px;}}
+.brand{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--font-display);font-weight:700;
+  font-size:15.5px;letter-spacing:-.01em;
+  text-decoration:none;white-space:nowrap;
+}
+.brand .mark{
+  width:26px;height:26px;flex:none;
+  stroke:var(--ink);stroke-width:1.4;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.brand .mark .fill1{fill:var(--accent);stroke:none;}
+.brand .mark .key{fill:var(--ink);stroke:none;}
+/* Hoehenlinien auf dem Display: duenner als das Gehaeuse und in der
+   hellen Akzentfarbe, damit sie auf dem Rost lesbar bleiben. */
+.brand .mark .topo{stroke:var(--accent-ink);stroke-width:.85;}
+
+.nav-links{
+  list-style:none;margin:0;padding:0;
+  display:flex;align-items:center;gap:24px;
+  margin-left:auto;
+}
+.nav-links a{
+  text-decoration:none;font-size:14.5px;color:var(--ink-soft);
+  padding:4px 0;border-bottom:1px solid transparent;
+  white-space:nowrap;
+}
+.nav-links a:hover{color:var(--ink);border-bottom-color:var(--accent);}
+
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:22px;}
+.btn-feedback{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent);
+  color:var(--accent-ink);
+  font-size:13.5px;font-weight:600;
+  padding:9px 15px;border-radius:var(--radius-s);
+  text-decoration:none;border:1px solid transparent;
+  transition:transform .12s ease, background .12s ease;
+  cursor:pointer;white-space:nowrap;
+}
+.btn-feedback:hover{background:var(--accent-deep);}
+.btn-feedback:active{transform:translateY(1px);}
+.btn-feedback svg{width:15px;height:15px;flex:none;}
+
+.nav-menu-btn{
+  display:none;align-items:center;justify-content:center;
+  width:34px;height:34px;
+  background:none;border:1px solid var(--line-strong);
+  border-radius:var(--radius-s);color:var(--ink);cursor:pointer;
+}
+@media (max-width:1040px){
+  /* nav-links traegt auf dem Desktop das margin-left:auto. Sobald es
+     ausgeblendet ist, muss nav-right selbst nach rechts schieben,
+     sonst klebt der Menuebutton am Markennamen. */
+  .nav-right{margin-left:auto;}
+  .nav-links{
+    display:none;
+    position:absolute;top:100%;left:0;right:0;
+    flex-direction:column;gap:0;align-items:stretch;
+    background:var(--sand-raised);
+    border-bottom:1px solid var(--line-strong);
+    box-shadow:0 12px 28px rgba(43,39,33,.14);
+  }
+  .nav-links.is-open{display:flex;}
+  .nav-links li + li a{border-top:1px solid var(--line);}
+  .nav-links a{
+    display:block;width:100%;
+    padding:14px 28px;font-size:16px;
+    color:var(--ink);white-space:normal;
+    border-bottom:none;
+  }
+  .nav-links a:hover{background:var(--sand-sunken);border-bottom-color:transparent;}
+  .nav-menu-btn{display:flex;}
+}
+@media (max-width:700px){
+  .btn-feedback span.label{display:none;}
+  .btn-feedback{padding:8px 10px;}
+}
+/* Der Markenname ist lang. Statt Wörter zu streichen wird er gestaffelt
+   kleiner, damit die Navigation auf schmalen Displays nicht überläuft. */
+@media (max-width:700px){
+  .site-nav .inner{gap:12px;}
+  .brand{font-size:13px;gap:7px;}
+  .brand .mark{width:23px;height:23px;}
+}
+.nav-feedback-item{display:none;}
+@media (max-width:430px){
+  /* Unter 430px reicht der Platz nicht fuer Logo, langen Titel und
+     Feedback-Button nebeneinander. Der Button wandert deshalb in das
+     Menue, statt Logo oder Titel zu beschneiden. */
+  .nav-right .btn-feedback{display:none;}
+  .nav-feedback-item{display:block;}
+  .nav-feedback-item a{color:var(--accent);font-weight:600;}
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:15px;font-weight:600;text-decoration:none;
+  padding:12px 20px;border-radius:var(--radius-s);
+  border:1px solid transparent;cursor:pointer;
+}
+.btn svg{width:16px;height:16px;flex:none;}
+.btn-primary{background:var(--accent);color:var(--accent-ink);}
+.btn-primary:hover{background:var(--accent-deep);}
+.btn-ghost{background:none;color:var(--ink);border-color:var(--line-strong);}
+.btn-ghost:hover{border-color:var(--ink);background:var(--sand-raised);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:78px 0 62px;}
+.hero h1{
+  font-size:clamp(32px, 5.1vw, 55px);
+  line-height:1.06;
+  font-weight:700;
+  letter-spacing:-.026em;
+  max-width:19ch;
+}
+.hero-lede{
+  margin-top:22px;max-width:62ch;
+  font-size:18.5px;color:var(--ink-soft);line-height:1.62;
+}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;}
+
+/* Legende als Datenstreifen, direkt unter dem Hero. */
+.hero-legend{
+  margin-top:52px;
+  max-width:640px;
+}
+.legend-strip{display:flex;height:9px;border-radius:1px;overflow:hidden;}
+.legend-strip span{flex:1;}
+.hero-legend-labels{
+  display:flex;margin-top:8px;
+  font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);
+}
+.hero-legend-labels span{flex:1;}
+.hero-legend-labels span:last-child{text-align:right;flex:0 0 auto;}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+section{padding:60px 0;scroll-margin-top:70px;}
+.section-head{margin-bottom:38px;}
+.section-head h2{font-size:clamp(25px, 3.3vw, 34px);line-height:1.15;max-width:22ch;}
+.section-head .desc{
+  margin-top:16px;max-width:var(--measure);
+  color:var(--ink-soft);font-size:17px;
+}
+
+/* ============================================================
+   VERGLEICHSTABELLE / DATENTABELLEN
+   ============================================================ */
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--sand-raised);}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:560px;}
+caption{
+  text-align:left;padding:16px 20px 0;
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+th,td{padding:13px 20px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);}
+thead th{
+  font-family:var(--font-display);font-weight:600;font-size:13px;
+  letter-spacing:.02em;color:var(--ink);
+  background:var(--sand-sunken);
+  border-bottom:1px solid var(--line-strong);
+  white-space:nowrap;
+}
+tbody tr:last-child th, tbody tr:last-child td{border-bottom:none;}
+tbody th{
+  font-family:var(--font-body);font-weight:600;font-size:15px;
+  width:1%;white-space:nowrap;color:var(--ink);
+}
+td.dim{color:var(--ink-soft);}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+/* Handy-Spalte visuell zurücknehmen, Uhr-Spalte hervorheben. */
+.cmp col.watch{background:color-mix(in srgb, var(--accent) 7%, transparent);}
+.cmp thead th.watch{background:color-mix(in srgb, var(--accent) 17%, var(--sand-sunken));}
+
+/* Farbchip in der Klassentabelle */
+.chip{
+  display:inline-block;width:26px;height:13px;
+  border-radius:1px;border:1px solid rgba(43,39,33,.28);
+  vertical-align:-2px;margin-right:10px;
+}
+
+/* ============================================================
+   GRENZEN (ehrliche Einschränkungen)
+   ============================================================ */
+.limits{
+  list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:var(--radius-m);
+  overflow:hidden;
+}
+@media (max-width:760px){.limits{grid-template-columns:1fr;}}
+.limits li{background:var(--sand-raised);padding:22px 24px;}
+.limits h3{font-size:16.5px;margin-bottom:7px;}
+.limits p{color:var(--ink-soft);font-size:15px;}
+
+/* ============================================================
+   KARTE
+   ============================================================ */
+.map-layout{display:grid;grid-template-columns:1fr 330px;gap:24px;align-items:start;}
+@media (max-width:900px){.map-layout{grid-template-columns:1fr;}}
+
+.map-stage{
+  position:relative;
+  background:var(--sand-raised);
+  border:1px solid var(--line);border-radius:var(--radius-m);
+  height:520px;overflow:hidden;cursor:grab;touch-action:none;
+}
+.map-stage.is-panning{cursor:grabbing;}
+#regionSvg{width:100%;height:100%;display:block;}
+
+.region-path{
+  fill:var(--rfill, var(--map-fill-fallback));
+  stroke:var(--map-stroke);
+  stroke-width:1.4;
+  cursor:pointer;
+  transition:fill .12s ease;
+  vector-effect:non-scaling-stroke;
+}
+/* Grundflaeche je Land: liegt unter den Regionen und schliesst die
+   Haarrisse an Verwaltungsgrenzen. Nutzt dieselbe Geometrie wie
+   .country-outline, deshalb enden Farbe und Rand exakt an derselben Kante. */
+.country-fill{
+  stroke:none;
+  pointer-events:none;
+}
+/* Dicke Aussenlinie je Land, aus der Vereinigung aller seiner Regionen
+   berechnet (nicht nur eine dickere Version der Regionsraender - die wuerde
+   weiterhin jede einzelne Kanton-/Bundeslandgrenze zeigen). Liegt ueber den
+   Flaechen, blockiert aber keine Klicks/Hover auf die Regionen darunter. */
+.country-outline{
+  fill:none;
+  stroke:var(--ink);
+  stroke-width:3;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+}
+/* Nie den rechteckigen Browser-Fokusring: er umschliesst die
+   Bounding-Box des Pfads, nicht die Region, und wirkt wie ein Fehler. */
+.region-path:focus{outline:none;}
+.region-path:hover{fill:var(--accent);}
+.region-path:focus-visible{fill:var(--accent);stroke:var(--ink);stroke-width:2.6;}
+.region-path.is-selected{fill:var(--accent);stroke:var(--ink);stroke-width:2;}
+
+.map-tooltip{
+  position:absolute;pointer-events:none;opacity:0;
+  background:var(--ink);color:var(--sand-raised);
+  font-size:12.5px;padding:5px 9px;border-radius:var(--radius-s);
+  white-space:nowrap;transform:translate(-50%,-140%);z-index:5;
+}
+.map-tooltip.is-on{opacity:1;}
+.map-tooltip .c{color:color-mix(in srgb, var(--sand-raised) 62%, transparent);}
+
+.map-hint{
+  position:absolute;left:14px;bottom:12px;z-index:4;
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;
+  color:var(--ink-faint);
+  background:color-mix(in srgb, var(--sand-raised) 88%, transparent);
+  padding:4px 8px;border-radius:var(--radius-s);
+}
+.map-zoom{
+  position:absolute;top:14px;right:14px;z-index:6;
+  display:flex;flex-direction:column;
+  border:1px solid var(--line-strong);border-radius:var(--radius-s);overflow:hidden;
+}
+.map-zoom button{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  background:var(--sand-raised);border:none;cursor:pointer;color:var(--ink);
+  border-bottom:1px solid var(--line);
+}
+.map-zoom button:last-child{border-bottom:none;}
+.map-zoom button:hover{background:var(--sand-sunken);}
+.map-zoom svg{width:15px;height:15px;}
+
+.map-panel{
+  background:var(--sand-raised);
+  border:1px solid var(--line);border-radius:var(--radius-m);
+  padding:24px;min-height:280px;
+}
+.map-panel .empty-state{
+  color:var(--ink-faint);font-size:14.5px;
+  display:flex;flex-direction:column;align-items:flex-start;
+  padding-top:24px;
+}
+.map-panel h3{font-size:22px;margin-top:2px;}
+.map-panel .country{
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;
+  color:var(--ink-faint);margin-top:5px;
+}
+.map-panel .stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin:22px 0;padding:16px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.map-panel .stat b{
+  display:block;font-family:var(--font-mono);font-size:15px;
+  font-weight:500;font-variant-numeric:tabular-nums;
+}
+.map-panel .stat span{display:block;font-size:11.5px;color:var(--ink-faint);margin-top:3px;}
+.map-panel .btn{width:100%;justify-content:center;}
+.dateiname{margin-top:12px;font-family:var(--font-mono);font-size:11.5px;
+  letter-spacing:.04em;color:var(--ink-faint);word-break:break-all;}
+.spaeter{margin-top:18px;font-size:15px;color:var(--ink-soft);line-height:1.55;}
+
+/* ============================================================
+   EINRICHTUNG
+   ============================================================ */
+.prereq{
+  display:flex;flex-wrap:wrap;gap:10px;
+  margin-bottom:34px;padding:0;list-style:none;
+}
+.prereq li{
+  font-family:var(--font-mono);font-size:12.5px;
+  background:var(--sand-raised);border:1px solid var(--line);
+  padding:7px 12px;border-radius:var(--radius-s);color:var(--ink-soft);
+}
+
+.steps{counter-reset:step;display:grid;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;}
+.step{background:var(--sand-raised);padding:24px 28px;display:grid;
+  grid-template-columns:27px 1fr;gap:18px;align-items:start;}
+@media (max-width:600px){.step{gap:14px;padding:20px;}}
+.step-num{
+  counter-increment:step;
+  display:flex;align-items:center;justify-content:center;
+  width:27px;height:27px;border-radius:50%;flex:none;
+  background:var(--accent);color:var(--accent-ink);
+  font-family:var(--font-mono);font-size:13px;font-weight:500;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.step-num::before{content:counter(step);}
+.step h3{font-size:18px;margin-bottom:8px;}
+.step p{color:var(--ink-soft);font-size:15.5px;max-width:62ch;}
+.step p + p{margin-top:10px;}
+code{
+  font-family:var(--font-mono);font-size:.88em;
+  background:var(--sand-sunken);padding:2px 6px;border-radius:2px;
+  color:var(--ink);white-space:nowrap;
+}
+.step .why{
+  margin-top:12px;padding-left:14px;
+  border-left:2px solid var(--line-strong);
+  font-size:14.5px;color:var(--ink-faint);
+}
+
+.trouble{
+  margin-top:34px;padding:24px 26px;
+  background:var(--sand-raised);
+  border:1px solid var(--line);border-radius:var(--radius-m);
+}
+.trouble h3{font-size:17px;margin-bottom:14px;}
+.trouble dl{margin:0;display:grid;gap:14px;}
+.trouble dt{font-weight:600;font-size:15px;}
+.trouble dd{margin:3px 0 0;color:var(--ink-soft);font-size:15px;}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{padding:56px 0 34px;background:var(--sand-sunken);}
+.footer-top{display:grid;grid-template-columns:1.3fr 2fr;gap:44px;margin-bottom:44px;}
+@media (max-width:820px){.footer-top{grid-template-columns:1fr;gap:34px;}}
+.footer-feedback h3{font-size:19px;margin-bottom:9px;}
+.footer-feedback p{color:var(--ink-soft);font-size:15px;max-width:44ch;margin-bottom:18px;}
+/* Die Adresse steht zusaetzlich im Klartext unter dem Button: ein mailto-Link
+   allein hilft niemandem, der lieber aus einem anderen Programm schreibt. */
+.footer-feedback .footer-mail{
+  margin-top:14px;margin-bottom:0;
+  font-family:var(--font-mono);font-size:13px;
+}
+.footer-feedback .footer-mail a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--line-strong);}
+.footer-feedback .footer-mail a:hover{color:var(--accent);border-bottom-color:var(--accent);}
+.footer-links{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+@media (max-width:600px){.footer-links{grid-template-columns:1fr 1fr;}}
+.footer-links h5{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-faint);
+  margin:0 0 12px;font-weight:400;
+}
+.footer-links a{
+  display:block;text-decoration:none;font-size:14.5px;
+  color:var(--ink-soft);padding:3px 0;
+}
+.footer-links a:hover{color:var(--accent);}
+.footer-bottom{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding-top:22px;
+  font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);
+}
+
+/* ============================================================
+   KONZEPT-HINWEIS / TOAST
+   ============================================================ */
+
+</style>
+
+<nav class="site-nav">
+  <div class="inner">
+    <a href="#top" class="brand">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 4.7V1.5h5.8v3.2"/><path d="M9.1 19.3v3.2h5.8v-3.2"/><rect class="key" x="3.2" y="8.3" width="2.3" height="1.5" rx=".5"/><rect class="key" x="3.2" y="11.25" width="2.3" height="1.5" rx=".5"/><rect class="key" x="3.2" y="14.2" width="2.3" height="1.5" rx=".5"/><rect class="key" x="18.5" y="9.5" width="2.3" height="1.5" rx=".5"/><rect class="key" x="18.5" y="13" width="2.3" height="1.5" rx=".5"/><circle cx="12" cy="12" r="7.4"/><circle class="fill1" cx="12" cy="12" r="5.8"/><ellipse class="topo" cx="11.6" cy="13.1" rx="3.6" ry="2.3"/><ellipse class="topo" cx="12.4" cy="12" rx="1.6" ry="1.05"/></svg>
+      Hangneigungslayer für Garmin Uhren
+    </a>
+    <ul class="nav-links">
+      <li><a href="#handgelenk">Vorteile</a></li>
+      <li><a href="#klassen">Hangneigungsklassen</a></li>
+      <li><a href="#karte">Download</a></li>
+      <li><a href="#einrichtung">Einrichtung</a></li>
+      <li><a href="__BEISPIELE_URL__">Beispiele</a></li>
+      <li><a href="__INFO_URL__">Kompatibilität</a></li>
+      <li class="nav-feedback-item"><a href="__MAILTO_ALLGEMEIN__">Feedback senden</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="__MAILTO_ALLGEMEIN__" class="btn-feedback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <span class="label">Feedback </span><span>senden</span>
+      </a>
+      <button class="nav-menu-btn" aria-label="Menü öffnen" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div id="top"></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Skitouren · Freeride · Skibergsteigen</div>
+    <h1>Der Hangneigungslayer: Direkt an deinem Handgelenk.</h1>
+    <p class="hero-lede">Der Hangneigungslayer färbt jeden Hang ab 30 Grad ein. Bisher gab es ihn nur in Karten-Apps am Handy. Jetzt liegt er als Kartendatei auf deiner Garmin Uhr, offline und schnell verfügbar.</p>
+    <div class="hero-actions">
+      <a href="#karte" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.4-2.7A1 1 0 0 1 3 16.4V5.6a1 1 0 0 1 1.4-.9L9 7m0 13l6-3m-6 3V7m6 10l4.6 2.3a1 1 0 0 0 1.4-.9V7.6a1 1 0 0 0-.6-.9L15 4m0 13V4m0 0L9 7"/></svg>
+        Download
+      </a>
+      <a href="__BEISPIELE_URL__" class="btn btn-ghost">Beispiele</a>
+      <a href="__INFO_URL__" class="btn btn-ghost">Passt meine Uhr?</a>
+    </div>
+    <div class="hero-legend">
+      <div class="eyebrow" style="margin-bottom:10px">Hangneigungsklassen im Layer</div>
+      <div class="legend-strip">
+        <span style="background:var(--slope-1)"></span>
+        <span style="background:var(--slope-2)"></span>
+        <span style="background:var(--slope-3)"></span>
+        <span style="background:var(--slope-4)"></span>
+        <span style="background:var(--slope-5)"></span>
+      </div>
+      <div class="hero-legend-labels">
+        <span>30°</span><span>35°</span><span>40°</span><span>45°</span><span>50°+</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="handgelenk">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Vorteile</div>
+      <h2>Im Gelände zählt, wie schnell du nachsehen kannst.</h2>
+      <p class="desc">Viele Skitourengeher navigieren heute schon mit ihrer Sportuhr oder tracken die Aktivität. Die Uhr ist dann eh schon am Handgelenk. Ein schneller Blick genügt nun, um die Steilheit der näheren Umgebung zu checken und seine Route evtl. anzupassen.</p>
+    </div>
+
+    <div class="table-scroll">
+      <table class="cmp">
+        <colgroup><col><col><col class="watch"></colgroup>
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Am Handy</th>
+            <th scope="col" class="watch">An der Uhr</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Zugriff</th>
+            <td class="dim">Aus der Tasche holen, entsperren</td>
+            <td>Ärmel hochschieben</td>
+          </tr>
+          <tr>
+            <th scope="row">Handschuhe</th>
+            <td class="dim">Ausziehen</td>
+            <td>Bleiben an</td>
+          </tr>
+          <tr>
+            <th scope="row">Kälte und Nässe</th>
+            <td class="dim">Akku bricht ein, Gerät wird nass</td>
+            <td>Bleibt geschützt am Arm</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="klassen">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Was der Layer zeigt</div>
+      <h2>Fünf Farben, fünf Neigungsbereiche.</h2>
+      <p class="desc">Flächen unter 30 Grad bleiben transparent, damit die darunterliegende Karte lesbar bleibt. Ab 30 Grad beginnt die Einfärbung. Ein geladener Track und die eigene Position werden immer über dem Hangneigungslayer dargestellt.</p>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Farbe</th>
+            <th scope="col">Hangneigung</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><span class="chip" style="background:var(--slope-1)"></span>Gelb</th><td class="num dim">30 bis 35°</td></tr>
+          <tr><th scope="row"><span class="chip" style="background:var(--slope-2)"></span>Orange</th><td class="num dim">35 bis 40°</td></tr>
+          <tr><th scope="row"><span class="chip" style="background:var(--slope-3)"></span>Pink</th><td class="num dim">40 bis 45°</td></tr>
+          <tr><th scope="row"><span class="chip" style="background:var(--slope-4)"></span>Lila</th><td class="num dim">45 bis 50°</td></tr>
+          <tr><th scope="row"><span class="chip" style="background:var(--slope-5)"></span>Grau</th><td class="num dim">ab 50°</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="grenzen">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Grenzen</div>
+      <h2>Was der Layer nicht leistet.</h2>
+    </div>
+
+    <ul class="limits">
+      <li>
+        <h3>Er ist ein Hilfsmittel, keine Entscheidung.</h3>
+        <p>Der Layer zeigt die Neigung des Geländes. Alles Weitere bleibt deine Beurteilung und die deiner Ausbildung.</p>
+      </li>
+      <li>
+        <h3>Er ist so genau wie das Geländemodell.</h3>
+        <p>Gerechnet auf einem 10-Meter-Raster. Schmale Rinnen und kurze Steilstufen fallen durch dieses Raster und erscheinen nicht.</p>
+      </li>
+      <li>
+        <h3>Aktualität der Daten.</h3>
+        <p>Es wurden nach Möglichkeit die aktuellsten Daten verarbeitet, aber gerade im vergletscherten Gebirge können sich die Gegebenheiten schnell ändern.</p>
+      </li>
+      <li>
+        <h3>Er ist kein Ersatz für die Planung.</h3>
+        <p>Die Tourenplanung gehört an den großen Bildschirm. Auf der Uhr geht es um die Kontrolle im Gelände.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="map-section" id="karte">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Regionsauswahl</div>
+      <h2>Bundesland, Kanton, Region.</h2>
+      <p class="desc">Österreich, die Schweiz und Bayern sind fertig, das sind 36 Verwaltungseinheiten. Jede Region ist eine eigene Kartendatei, damit auf der Uhr nur liegt, was du brauchst. Frankreich und Italien folgen. Klicke eine Region an.</p>
+    </div>
+
+    <div class="map-layout">
+      <div class="map-stage" id="mapStage">
+        <svg id="regionSvg" viewBox="0 0 1000 744" role="img" aria-label="Karte der Alpenregionen"></svg>
+        <div class="map-tooltip" id="mapTooltip"><span class="n"></span> <span class="c"></span></div>
+        <div class="map-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Vereinfachte Umrisse echter Verwaltungsgrenzen
+        </div>
+        <div class="map-zoom">
+          <button type="button" id="zoomIn" aria-label="Vergrößern">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/></svg>
+          </button>
+          <button type="button" id="zoomOut" aria-label="Verkleinern">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8 11h6"/></svg>
+          </button>
+          <button type="button" id="zoomReset" aria-label="Ansicht zurücksetzen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="map-panel" id="mapPanel">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" style="margin-bottom:14px;opacity:.5"><path d="M9 20l-5.4-2.7A1 1 0 0 1 3 16.4V5.6a1 1 0 0 1 1.4-.9L9 7m0 13l6-3m-6 3V7m6 10l4.6 2.3a1 1 0 0 0 1.4-.9V7.6a1 1 0 0 0-.6-.9L15 4m0 13V4m0 0L9 7"/></svg>
+          Wähle eine Region aus, um Datenstand und Download zu sehen.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="einrichtung">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Einrichtung</div>
+      <h2>Einmal einrichten, dann liegt der Layer dauerhaft auf der Uhr.</h2>
+      <p class="desc">Rechne mit etwa fünf Minuten. Die Menübezeichnungen unterscheiden sich je nach Modell und Software-Stand geringfügig.</p>
+    </div>
+
+    <ul class="prereq">
+      <li>Garmin Uhr mit Kartennavigation</li>
+      <li>USB-Datenkabel</li>
+      <li>ca. 200 MB freier Speicher je Region</li>
+    </ul>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <h3>Region herunterladen</h3>
+          <p>Oben in der Karte die gewünschte Region wählen und die <code>.img</code>-Datei herunterladen.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <h3>Datei auf die Uhr kopieren</h3>
+          <p>Uhr per USB anschließen. Die Datei unverändert in den Ordner <code>\GARMIN\</code> kopieren, dann das Laufwerk auswerfen und die Uhr abstecken. Bei einem Mac muss evtl. die Software OpenMTP installiert werden.</p>
+          <p class="why">Du kannst mehrere Layer auf die Uhr kopieren. Die werden dann nebeneinander dargestellt und du kannst einzelne Layer auch in der Uhr ausblenden.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <h3>Layer aktivieren und gegenprüfen</h3>
+          <p>Auf der Kartendatenseite in einer Aktivität <code>MENU</code> gedrückt halten, dann <code>Aktivitätseinstellungen</code> → <code>Karte</code> → <code>Karten konfigurieren</code>.</p>
+          <p class="why">Hier können die einzelnen Layer aktiviert und deaktiviert werden.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-feedback">
+        <h3>Rückmeldung</h3>
+        <p>Der Hangneigungslayer bleibt kostenlos und werbefrei. Fehler, fehlende Regionen oder Erfahrungen von der Uhr sind willkommen.</p>
+        <a href="__MAILTO_ALLGEMEIN__" class="btn-feedback">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <span class="label">Feedback </span><span>senden</span>
+        </a>
+        <p class="footer-mail"><a href="__MAILTO_ALLGEMEIN__">__MAIL_ADRESSE__</a></p>
+      </div>
+      <div class="footer-links">
+        <div class="col">
+          <h5>Seite</h5>
+          <a href="#handgelenk">Vorteile</a>
+          <a href="#klassen">Hangneigungsklassen</a>
+          <a href="#karte">Download</a>
+          <a href="#einrichtung">Einrichtung</a>
+        </div>
+        <div class="col">
+          <h5>Technik</h5>
+          <a href="__INFO_URL__">Kompatible Modelle</a>
+          <a href="__INFO_URL__#dokumentation">So entsteht der Layer</a>
+          <a href="__INFO_URL__#rechte">Datenquellen</a>
+          <a href="__BEISPIELE_URL__">Beispiele</a>
+        </div>
+        <div class="col">
+          <h5>Kontakt</h5>
+          <a href="__MAILTO_FEHLER__">Fehler melden</a>
+          <a href="__MAILTO_REGION__">Region vorschlagen</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Hangneigungslayer für Garmin Uhren</p>
+      <p>36 Regionen · 3 Länder</p>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+// ---- mobiles Menü ----
+(function initMobileNav(){
+  const btn = document.querySelector(".nav-menu-btn");
+  const links = document.querySelector(".nav-links");
+  if(!btn || !links) return;
+  btn.addEventListener("click", () => {
+    const open = links.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", String(open));
+  });
+  links.querySelectorAll("a").forEach(a => a.addEventListener("click", () => {
+    links.classList.remove("is-open");
+    btn.setAttribute("aria-expanded", "false");
+  }));
+})();
+
+const MAP_DATA = __MAP_DATA_JSON__;
+// Fertige Umriss-Pfade je Land, per Python/shapely aus der Vereinigung aller
+// Regionen desselben Landes vorberechnet (siehe build/make_country_outlines.py).
+const COUNTRY_OUTLINES = __COUNTRY_OUTLINES_JSON__;
+
+const svgNS = "http://www.w3.org/2000/svg";
+const regionSvg = document.getElementById("regionSvg");
+regionSvg.setAttribute("viewBox", `0 0 ${MAP_DATA.viewW} ${MAP_DATA.viewH}`);
+const tooltip = document.getElementById("mapTooltip");
+const stage = document.getElementById("mapStage");
+const panel = document.getElementById("mapPanel");
+
+let selectedEl = null;
+
+// Echte Downloaddaten, beim Bauen aus den fertigen .img-Dateien erzeugt
+// (siehe build/make_downloads.py). Schluessel ist "ISO|Regionsname".
+const DOWNLOADS = __DOWNLOADS_JSON__;
+
+function formatPanel(region){
+  const info = DOWNLOADS[region.iso + "|" + region.name] || { vorhanden: false };
+
+  if(!info.vorhanden){
+    panel.innerHTML = `
+      <div class="eyebrow" style="margin-bottom:6px">${region.country}</div>
+      <h3>${region.name}</h3>
+      <div class="country">Noch kein Layer</div>
+      <p class="spaeter">Für diese Region gibt es den Hangneigungslayer noch nicht.
+      Die Daten folgen zu einem späteren Zeitpunkt.</p>
+    `;
+    return;
+  }
+
+  // Die Datenstand-Kachel entfaellt, wo der Jahrgang der Quelle nicht
+  // belegbar ist - lieber zwei Kacheln als eine erfundene Zahl.
+  const kacheln = [
+    `<div class="stat"><b>${info.groesse}</b><span>Dateigröße</span></div>`,
+    info.datenstand ? `<div class="stat"><b>${info.datenstand}</b><span>Datenstand</span></div>` : "",
+    `<div class="stat"><b>${info.raster}</b><span>Rasterweite</span></div>`,
+  ].filter(Boolean).join("");
+
+  panel.innerHTML = `
+    <div class="eyebrow" style="margin-bottom:6px">${region.country}</div>
+    <h3>${region.name}</h3>
+    <div class="country">Hangneigungslayer · ${region.iso}</div>
+    <div class="stats">${kacheln}</div>
+    <a href="${info.url}" class="btn btn-primary dl-btn" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+      .img herunterladen
+    </a>
+    <p class="dateiname">${info.datei}</p>
+  `;
+}
+
+function selectRegion(el, region){
+  if(selectedEl) selectedEl.classList.remove("is-selected");
+  el.classList.add("is-selected");
+  selectedEl = el;
+  formatPanel(region);
+}
+
+// Feste Zuordnung Land -> Flaechenfarbe. Bewusst quer durch den Farbkreis
+// statt Blautoenen gewaehlt, damit die fuenf Laender auf einen Blick
+// auseinanderzuhalten sind.
+const COUNTRY_COLORS = {
+  AUT: "#6B7A3D", // Moosgruen
+  CHE: "#C08A2E", // Ocker/Gold
+  DEU: "#6E3B57", // Aubergine
+  FRA: "#3F6B58", // Tannengruen
+  ITA: "#8B3F32", // Ziegelrot
+};
+function colorFill(region){
+  return COUNTRY_COLORS[region.iso] || "var(--map-fill-fallback)";
+}
+
+// Aufbau der Karte in drei Lagen, von unten nach oben:
+//   1. Grundflaeche je Land   - garantiert, dass ueberall Farbe liegt
+//   2. Regionen je Land       - liefern Klick, Hover und die weissen Innengrenzen
+//   3. schwarze Aussenlinie   - je Land
+//
+// Lage 1 und 3 nutzen EXAKT dieselben Pfaddaten (COUNTRY_OUTLINES). Dadurch
+// enden Farbe und Rand zwangslaeufig an derselben Kante. Die Laenderflaechen
+// kacheln den Alpenbogen seit make_country_outlines_v2.py lueckenlos, es gibt
+// also auch zwischen zwei Laendern keinen farblosen Streifen mehr.
+//
+// Lage 2 wird je Land in eine <clipPath> gelegt. Grund: die Regionspfade sind
+// beim Bauen leicht aufgeblasen worden, damit Nachbarregionen sich beruehren
+// und ihre weissen Raender zu EINER Linie verschmelzen statt ein breites
+// weisses Band ueber der Luecke zu bilden. Ohne Zuschnitt wuerde dieses
+// Aufblasen ueber die Landesgrenze hinausragen.
+const defs = document.createElementNS(svgNS, "defs");
+regionSvg.appendChild(defs);
+
+const laenderGruppe = {};
+Object.entries(COUNTRY_OUTLINES).forEach(([iso, d]) => {
+  const grund = document.createElementNS(svgNS, "path");
+  grund.setAttribute("d", d);
+  grund.setAttribute("class", "country-fill");
+  grund.setAttribute("fill", COUNTRY_COLORS[iso] || "var(--map-fill-fallback)");
+  grund.setAttribute("aria-hidden", "true");
+  regionSvg.appendChild(grund);
+
+  const clip = document.createElementNS(svgNS, "clipPath");
+  clip.setAttribute("id", "clip" + iso);
+  const clipPfad = document.createElementNS(svgNS, "path");
+  clipPfad.setAttribute("d", d);
+  clip.appendChild(clipPfad);
+  defs.appendChild(clip);
+
+  const g = document.createElementNS(svgNS, "g");
+  g.setAttribute("clip-path", `url(#clip${iso})`);
+  regionSvg.appendChild(g);
+  laenderGruppe[iso] = g;
+});
+
+MAP_DATA.regions.forEach(region => {
+  const el = document.createElementNS(svgNS, "path");
+  el.setAttribute("d", region.d);
+  el.setAttribute("class", "region-path");
+  el.setAttribute("tabindex", "0");
+  el.setAttribute("role", "button");
+  el.setAttribute("aria-label", region.name + ", " + region.country);
+  el.dataset.name = region.name;
+  el.dataset.country = region.country;
+  el.dataset.iso = region.iso;
+  el.style.setProperty("--rfill", colorFill(region));
+
+  el.addEventListener("mouseenter", () => {
+    tooltip.querySelector(".n").textContent = region.name;
+    tooltip.querySelector(".c").textContent = "· " + region.country;
+    tooltip.classList.add("is-on");
+  });
+  el.addEventListener("mousemove", (e) => {
+    const r = stage.getBoundingClientRect();
+    tooltip.style.left = (e.clientX - r.left) + "px";
+    tooltip.style.top  = (e.clientY - r.top) + "px";
+  });
+  el.addEventListener("mouseleave", () => tooltip.classList.remove("is-on"));
+  el.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); selectRegion(el, region); }
+  });
+
+  (laenderGruppe[region.iso] || regionSvg).appendChild(el);
+});
+
+// Dicke Aussenlinie je Land. COUNTRY_OUTLINES enthaelt bereits fertige
+// Pfaddaten (Vereinigung aller Regionen des Landes, ausserhalb per Python/
+// shapely berechnet - im Browser eine echte Polygon-Vereinigung nachzubauen
+// waere ohne zusaetzliche Bibliothek nicht sinnvoll machbar). Als eigene
+// <path>-Elemente NACH allen Regionen angehaengt, damit die Linie ueber den
+// Flaggenfuellungen liegt; pointer-events:none haelt Klick/Hover auf den
+// Regionen darunter funktionsfaehig.
+Object.entries(COUNTRY_OUTLINES).forEach(([iso, d]) => {
+  const outline = document.createElementNS(svgNS, "path");
+  outline.setAttribute("d", d);
+  outline.setAttribute("class", "country-outline");
+  outline.setAttribute("aria-hidden", "true");
+  regionSvg.appendChild(outline);
+});
+
+// ---- Zoom und Pan über die viewBox ----
+(function initZoomPan(){
+  const vb = { x:0, y:0, w:MAP_DATA.viewW, h:MAP_DATA.viewH };
+  const MIN_W = MAP_DATA.viewW / 8;
+
+  function applyVB(){ regionSvg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); }
+  function clampPan(){
+    vb.x = Math.max(0, Math.min(vb.x, MAP_DATA.viewW - vb.w));
+    vb.y = Math.max(0, Math.min(vb.y, MAP_DATA.viewH - vb.h));
+  }
+  function zoomAt(factor, cxRatio, cyRatio){
+    const newW = Math.max(MIN_W, Math.min(MAP_DATA.viewW, vb.w * factor));
+    const newH = newW * (MAP_DATA.viewH / MAP_DATA.viewW);
+    vb.x += (vb.w - newW) * cxRatio;
+    vb.y += (vb.h - newH) * cyRatio;
+    vb.w = newW; vb.h = newH;
+    clampPan(); applyVB();
+  }
+
+  document.getElementById("zoomIn").addEventListener("click", () => zoomAt(1/1.4, .5, .5));
+  document.getElementById("zoomOut").addEventListener("click", () => zoomAt(1.4, .5, .5));
+  document.getElementById("zoomReset").addEventListener("click", () => {
+    vb.x = 0; vb.y = 0; vb.w = MAP_DATA.viewW; vb.h = MAP_DATA.viewH; applyVB();
+  });
+
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const r = stage.getBoundingClientRect();
+    zoomAt(e.deltaY > 0 ? 1.15 : 1/1.15, (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  }, { passive:false });
+
+  let isPanning = false, lastX = 0, lastY = 0, dragDist = 0;
+  stage.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".map-zoom")) return;
+    isPanning = true; dragDist = 0;
+    lastX = e.clientX; lastY = e.clientY;
+    stage.classList.add("is-panning");
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (!isPanning) return;
+    const r = stage.getBoundingClientRect();
+    dragDist += Math.abs(e.clientX - lastX) + Math.abs(e.clientY - lastY);
+    vb.x -= (e.clientX - lastX) * (vb.w / r.width);
+    vb.y -= (e.clientY - lastY) * (vb.h / r.height);
+    lastX = e.clientX; lastY = e.clientY;
+    clampPan(); applyVB();
+  });
+
+  function endPan(e){
+    isPanning = false;
+    stage.classList.remove("is-panning");
+    if(dragDist <= 6 && e && e.type === "pointerup"){
+      // setPointerCapture leitet den synthetischen Klick auf die Bühne um,
+      // deshalb wird die getroffene Region über die Koordinaten gesucht.
+      const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
+      const hit = elAtPoint ? elAtPoint.closest(".region-path") : null;
+      if(hit){
+        const region = MAP_DATA.regions.find(r => r.name === hit.dataset.name && r.country === hit.dataset.country);
+        if(region) selectRegion(hit, region);
+      }
+    }
+  }
+  stage.addEventListener("pointerup", endPan);
+  stage.addEventListener("pointerleave", () => endPan());
+})();
+
+</script>

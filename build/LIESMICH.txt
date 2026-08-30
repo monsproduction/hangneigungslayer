@@ -1,0 +1,76 @@
+Hangneigungslayer für Garmin Uhren
+==================================
+
+Was das ist
+-----------
+Eine Garmin-Kartendatei (.img), die Hänge ab 30 Grad einfärbt. Sie liegt als
+zusätzlicher Layer auf der Uhr und funktioniert offline, ohne Empfang.
+
+  Gelb    30 bis 35 Grad
+  Orange  35 bis 40 Grad
+  Pink    40 bis 45 Grad
+  Lila    45 bis 50 Grad
+  Grau    ab 50 Grad
+
+Flächen unter 30 Grad bleiben transparent, damit die darunterliegende Karte
+lesbar bleibt. Ein geladener Track und die eigene Position werden immer über
+dem Layer dargestellt.
+
+
+Einrichtung
+-----------
+1. Die gewünschte .img-Datei herunterladen.
+2. Uhr per USB anschließen. Die Datei unverändert in den Ordner \GARMIN\
+   kopieren, dann das Laufwerk auswerfen und die Uhr abstecken.
+   Bei einem Mac muss eventuell die Software OpenMTP installiert werden.
+3. Auf der Kartendatenseite in einer Aktivität MENU gedrückt halten, dann
+   Aktivitätseinstellungen -> Karte -> Karten konfigurieren.
+   Dort lassen sich die einzelnen Layer aktivieren und deaktivieren.
+
+Mehrere Layer können gleichzeitig auf der Uhr liegen.
+
+
+Grenzen
+-------
+Der Layer ist ein Hilfsmittel zur Geländebeurteilung. Er ersetzt weder den
+Lawinenlagebericht noch eine Ausbildung in Lawinenkunde.
+
+- Gerechnet auf einem 10-Meter-Raster. Schmale Rinnen und kurze Steilstufen
+  fallen durch dieses Raster und erscheinen nicht.
+- Dargestellt ist die Neigung des blanken Geländes, nicht des Schnees.
+- Im vergletscherten Gebirge können sich die Gegebenheiten schnell ändern.
+- Der bayerische Layer deckt nur den Alpenraum ab, nicht das gesamte
+  Bundesland.
+
+
+Datenquellen und Lizenzen
+-------------------------
+Alle verwendeten Geländemodelle sind offene Verwaltungsdaten. Die jeweilige
+Lizenz verlangt eine Nennung der Quelle.
+
+Österreich
+  Geoland.at, Digitales 10m - Geländemodell aus Airborne Laserscan Daten
+  Lizenz: CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+
+Schweiz
+  DTM Switzerland 10m v2 by Sonny, sonny.4lima.de
+  Grunddaten: swisstopo (Open Government Data)
+  Lizenz: CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+
+Bayern
+  Datenquelle: Bayerische Vermessungsverwaltung, DGM5
+  www.geodaten.bayern.de
+  Lizenz: CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+
+Verwaltungsgrenzen
+  geoBoundaries.org, ADM1
+  Lizenz: CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+
+Bearbeitung: Aus dem Höhenmodell wurde die Hangneigung berechnet, in fünf
+Klassen eingeteilt, vektorisiert und in das Garmin-Kartenformat überführt.
+Dieselbe Namensnennung steht auch in jeder .img-Datei selbst.
+
+
+Rückmeldung
+-----------
+hangneigungslayer@proton.me
