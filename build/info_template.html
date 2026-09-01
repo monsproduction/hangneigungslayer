@@ -330,13 +330,13 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
       <li>
         <div>
           <h3>Geländemodell beziehen</h3>
-          <p>Je Region das amtliche digitale Geländemodell laden, meist als GeoTIFF-Kacheln mit 1 bis 10 Metern Rasterweite. Quellen und Lizenzen stehen weiter unten.</p>
+          <p>Je Region das amtliche digitale Geländemodell laden, als GeoTIFF. Je nach Land ist das eine einzelne Datei oder ein Satz aus vielen Kacheln. Quellen und Lizenzen stehen weiter unten.</p>
         </div>
       </li>
       <li>
         <div>
-          <h3>In QGIS zusammenführen</h3>
-          <p>Die Kacheln werden über <code>gdalbuildvrt</code> zu einem virtuellen Raster verbunden, auf ein gemeinsames Koordinatensystem reprojiziert und einheitlich auf 10 Meter resampelt. Erst dadurch passen die Regionen an ihren Grenzen zusammen.</p>
+          <h3>Zu einer Datei zusammenführen</h3>
+          <p>Liegt das Modell als Kachelsatz vor, verbindet <code>gdalbuildvrt</code> die Kacheln zu einem virtuellen Raster, das anschließend mit <code>gdal_translate</code> in eine einzelne physische Datei geschrieben wird. Der Umweg lohnt sich: Die Neigungsberechnung direkt auf einem virtuellen Raster aus tausenden Kleindateien war in unseren Läufen um ein Vielfaches langsamer.</p>
         </div>
       </li>
       <li>
@@ -347,20 +347,26 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
       </li>
       <li>
         <div>
-          <h3>In fünf Klassen einteilen</h3>
-          <p>Der Raster-Rechner teilt die Grad-Werte in die Klassen ab 30, 35, 40, 45 und 50 Grad. Alles unter 30 Grad wird auf NoData gesetzt und fällt damit heraus.</p>
+          <h3>Je Region zuschneiden und resampeln</h3>
+          <p>Das Neigungsraster wird mit der Maske der jeweiligen Verwaltungseinheit zugeschnitten und einheitlich auf 10 Meter resampelt, im Mittelwertverfahren. Erst dadurch sind die Regionen untereinander vergleichbar, auch wenn die Ausgangsmodelle unterschiedlich fein sind.</p>
         </div>
       </li>
       <li>
         <div>
-          <h3>Vektorisieren und ausdünnen</h3>
-          <p><code>gdal_polygonize</code> macht aus den klassifizierten Zellen zusammenhängende Polygone. Anschließend werden Kleinstflächen verworfen und die Umrisse nach Douglas-Peucker vereinfacht, weil sie auf einem Uhrendisplay ohnehin nicht auflösen und die Datei sonst unnötig wächst.</p>
+          <h3>In fünf Klassen einteilen</h3>
+          <p>Der Raster-Rechner teilt die Grad-Werte in die Klassen ab 30, 35, 40, 45 und 50 Grad.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Vektorisieren</h3>
+          <p><code>gdal_polygonize</code> macht aus den klassifizierten Zellen zusammenhängende Polygone. Alles unter 30 Grad fällt heraus, benachbarte Flächen derselben Klasse werden zu einer zusammengefasst.</p>
         </div>
       </li>
       <li>
         <div>
           <h3>Zur Garmin-Karte kompilieren</h3>
-          <p>Die Polygone gehen als OSM-XML an <code>mkgmap</code>, zusammen mit einer eigenen Style-Datei und einer TYP-Datei. Die Style-Datei ordnet jeder Klasse einen eigenen Flächentyp zu, die TYP-Datei legt fest, in welcher Farbe die Uhr diesen Typ zeichnet. Ergebnis ist eine einzelne <code>.img</code>-Datei je Region.</p>
+          <p>Die Polygone gehen als OSM-XML zunächst an <code>splitter</code>, der sie in handhabbare Kacheln zerlegt, und dann an <code>mkgmap</code>, zusammen mit einer eigenen Style-Datei und einer TYP-Datei. Die Style-Datei ordnet jeder Klasse einen eigenen Flächentyp zu, die TYP-Datei legt fest, in welcher Farbe die Uhr diesen Typ zeichnet. Ergebnis ist eine einzelne <code>.img</code>-Datei je Region.</p>
         </div>
       </li>
     </ol>
@@ -376,7 +382,7 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
       </div>
       <div class="note">
         <h4>Warum 10 Meter Rasterweite?</h4>
-        <p>Feinere Raster erzeugen deutlich mehr Polygone, ohne auf dem Display sichtbaren Gewinn. 10 Meter ist der Kompromiss zwischen Dateigröße, Zeichengeschwindigkeit und ausreichender Geländetreue (gleiche Auflösung wie bei swisstopo).</p>
+        <p>10 Meter ist der Kompromiss zwischen Dateigröße, Zeichengeschwindigkeit und Geländetreue, dieselbe Auflösung wie bei swisstopo. Eine Zelle mit halber Kantenlänge vervierfacht die Datenmenge; ob das auf einem Uhrendisplay einen sichtbaren Gewinn bringt, wird gerade mit 5 Metern geprüft.</p>
       </div>
       <div class="note">
         <h4>Wie aktuell sind die Daten?</h4>
