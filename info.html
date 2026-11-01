@@ -7,9 +7,7 @@
 <link rel="icon" href="favicon-96.png" sizes="96x96" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fonts.css">
 
 <style>
 /* ============================================================
@@ -286,8 +284,7 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
 <section id="kompatibilitaet">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">Geräte</div>
-      <h2>Zeigt deine Uhr eine Karte, funktioniert der Layer.</h2>
+      <h2>Kompatibilität</h2>
       <p class="desc">Der Layer ist eine gewöhnliche Garmin-Kartendatei. Prüfen kannst du das in zehn Sekunden: <code>MENU</code> gedrückt halten, dann <code>Karte</code> öffnen. Gibt es dort <code>Kartendesign</code> oder eine Liste installierter Karten, passt deine Uhr.</p>
     </div>
 
@@ -321,52 +318,39 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
 <section id="dokumentation">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">Herkunft</div>
-      <h2>So entsteht der Layer.</h2>
-      <p class="desc">Grundlage sind digitale Geländemodelle, die die Vermessungsverwaltungen der Alpenländer als offene Daten bereitstellen. Aus der Höhe wird die Neigung gerechnet, aus der Neigung werden Flächen, aus den Flächen wird eine Garmin-Kartendatei.</p>
+      <h2>So entsteht der Layer</h2>
+      <p class="desc">Der Hangneigungslayer für Garmin basiert auf den Neigungskarten (SACM) von <a href="https://wiki.skitourenguru.com/de/articles/a0017.html" target="_blank" rel="noopener">Skitourenguru</a>, verwendet mit freundlicher Genehmigung von Günter Schmudlach. Aus diesen Karten werden fünf Neigungsklassen herausgelöst, in Flächen umgewandelt und zu einer Garmin-Kartendatei zusammengesetzt.</p>
     </div>
 
     <ol class="pipeline">
       <li>
         <div>
-          <h3>Geländemodell beziehen</h3>
-          <p>Je Region das amtliche digitale Geländemodell laden, als GeoTIFF. Je nach Land ist das eine einzelne Datei oder ein Satz aus vielen Kacheln. Quellen und Lizenzen stehen weiter unten.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Zu einer Datei zusammenführen</h3>
-          <p>Liegt das Modell als Kachelsatz vor, verbindet <code>gdalbuildvrt</code> die Kacheln zu einem virtuellen Raster, das anschließend mit <code>gdal_translate</code> in eine einzelne physische Datei geschrieben wird. Der Umweg lohnt sich: Die Neigungsberechnung direkt auf einem virtuellen Raster aus tausenden Kleindateien war in unseren Läufen um ein Vielfaches langsamer.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Neigung berechnen</h3>
-          <p>Aus dem Höhenraster entsteht mit <code>gdaldem slope</code>, in QGIS unter Raster / Analyse / Steigung, je Rasterzelle die Hangneigung in Grad.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Je Region zuschneiden und resampeln</h3>
-          <p>Das Neigungsraster wird mit der Maske der jeweiligen Verwaltungseinheit zugeschnitten und einheitlich auf 10 Meter resampelt, im Mittelwertverfahren. Erst dadurch sind die Regionen untereinander vergleichbar, auch wenn die Ausgangsmodelle unterschiedlich fein sind.</p>
+          <h3>Neigungskarten beziehen</h3>
+          <p>Grundlage sind die Neigungskarten (SACM) von <a href="https://wiki.skitourenguru.com/de/articles/a0017.html" target="_blank" rel="noopener">Skitourenguru</a> für den Alpenraum, als Kachelkarte im MBTiles-Format in 5 × 5 Metern. Die Neigung ist darin schon gerechnet und eingefärbt. Quellen und Rechte stehen weiter unten.</p>
         </div>
       </li>
       <li>
         <div>
           <h3>In fünf Klassen einteilen</h3>
-          <p>Der Raster-Rechner teilt die Grad-Werte in die Klassen ab 30, 35, 40, 45 und 50 Grad.</p>
+          <p>Jeder Bildpunkt der Kachelkarte wird anhand seiner Farbe der passenden Klasse ab 30, 35, 40, 45 oder 50 Grad zugeordnet. Alles unter 30 Grad fällt heraus.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Je Region zuschneiden</h3>
+          <p>Die Verwaltungsgrenze der Region dient als Maske, nur die Kacheln, die sie berühren, werden verwendet. Große Regionen sind in zehn Teile mit ungefähr gleich vielen Kacheln zerlegt, die ohne Lücke und ohne Überlappung aneinanderstoßen.</p>
         </div>
       </li>
       <li>
         <div>
           <h3>Vektorisieren</h3>
-          <p><code>gdal_polygonize</code> macht aus den klassifizierten Zellen zusammenhängende Polygone. Alles unter 30 Grad fällt heraus, benachbarte Flächen derselben Klasse werden zu einer zusammengefasst.</p>
+          <p><code>gdal_polygonize</code> macht aus den klassifizierten Zellen zusammenhängende Polygone. Benachbarte Flächen derselben Klasse werden zu einer zusammengefasst.</p>
         </div>
       </li>
       <li>
         <div>
           <h3>Zur Garmin-Karte kompilieren</h3>
-          <p>Die Polygone gehen als OSM-XML zunächst an <code>splitter</code>, der sie in handhabbare Kacheln zerlegt, und dann an <code>mkgmap</code>, zusammen mit einer eigenen Style-Datei und einer TYP-Datei. Die Style-Datei ordnet jeder Klasse einen eigenen Flächentyp zu, die TYP-Datei legt fest, in welcher Farbe die Uhr diesen Typ zeichnet. Ergebnis ist eine einzelne <code>.img</code>-Datei je Region.</p>
+          <p>Die Polygone gehen als OSM-XML zunächst an <code>splitter</code>, der sie in handhabbare Kacheln zerlegt, und dann an <code>mkgmap</code>, zusammen mit einer eigenen Style-Datei und einer TYP-Datei. Die Style-Datei ordnet jeder Klasse einen eigenen Flächentyp zu, die TYP-Datei legt fest, in welcher Farbe die Uhr diesen Typ zeichnet. Ergebnis ist eine <code>.img</code>-Datei je Region, bei zerlegten Regionen je Teil.</p>
         </div>
       </li>
     </ol>
@@ -381,8 +365,8 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
         <p>Der Speicher auf der Uhr ist begrenzt und große Kartendateien verlangsamen den Kartenaufbau spürbar. Eine Datei je Verwaltungseinheit hält die Dateien klein und lässt sich sauber wieder entfernen.</p>
       </div>
       <div class="note">
-        <h4>Warum 10 Meter Rasterweite?</h4>
-        <p>10 Meter ist der Kompromiss zwischen Dateigröße, Zeichengeschwindigkeit und Geländetreue, dieselbe Auflösung wie bei swisstopo. Eine Zelle mit halber Kantenlänge vervierfacht die Datenmenge; ob das auf einem Uhrendisplay einen sichtbaren Gewinn bringt, wird gerade mit 5 Metern geprüft.</p>
+        <h4>Warum 5 Meter Rasterweite?</h4>
+        <p>Die Hangneigung liegt in einem 5-Meter-Raster vor. Das ist feiner als die früheren 10 Meter und zeichnet auch schmale Rinnen und kurze Steilstufen. Eine Zelle mit halber Kantenlänge vervierfacht die Datenmenge; deshalb sind große Regionen in mehrere Teile zerlegt, damit die einzelnen Dateien handlich bleiben.</p>
       </div>
       <div class="note">
         <h4>Wie aktuell sind die Daten?</h4>
@@ -395,49 +379,17 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
 <section id="rechte">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">Quellen und Rechte</div>
-      <h2>Offene Daten, mit Namensnennung.</h2>
-      <p class="desc">Alle verwendeten Geländemodelle sind offene Verwaltungsdaten. Die jeweilige Lizenz verlangt eine Nennung der Quelle, die hier erfolgt und in der echten Version zusätzlich jeder Kartendatei beiliegt.</p>
+      <h2>Quellen und Rechte</h2>
+      <p class="desc">Der Layer beruht auf den Neigungskarten (SACM) von <a href="https://wiki.skitourenguru.com/de/articles/a0017.html" target="_blank" rel="noopener">Skitourenguru</a>, verwendet mit freundlicher Genehmigung von Günter Schmudlach.</p>
     </div>
 
-    <div class="table-scroll">
-      <table>
-        <caption>Verwendete Datenquellen</caption>
-        <thead>
-          <tr>
-            <th scope="col">Gebiet</th>
-            <th scope="col">Quelle</th>
-            <th scope="col">Lizenz</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">Österreich</th>
-            <td class="dim">Geoland.at, Digitales 10m – Geländemodell aus Airborne Laserscan Daten</td>
-            <td class="dim">CC BY 4.0</td>
-          </tr>
-          <tr>
-            <th scope="row">Schweiz</th>
-            <td class="dim">DTM Switzerland 10m v2 by Sonny (sonny.4lima.de), Grunddaten swisstopo (OGD)</td>
-            <td class="dim">CC BY 4.0</td>
-          </tr>
-          <tr>
-            <th scope="row">Bayern</th>
-            <td class="dim">Bayerische Vermessungsverwaltung, DGM5, www.geodaten.bayern.de</td>
-            <td class="dim">CC BY 4.0</td>
-          </tr>
-          <tr>
-            <th scope="row">Verwaltungsgrenzen</th>
-            <td class="dim">geoBoundaries.org, ADM1</td>
-            <td class="dim">CC BY 4.0</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <p class="after-note">Die Quellen der Höhendaten stehen in der Übersicht von Skitourenguru: <a href="https://wiki.skitourenguru.com/de/articles/a0052.html" target="_blank" rel="noopener">wiki.skitourenguru.com/de/articles/a0052.html</a></p>
 
-    <p class="after-note">Aufgeführt sind nur Quellen, aus denen tatsächlich Layer erzeugt wurden. Für Frankreich und Italien folgen die Angaben, sobald die Daten dort beschafft sind. Der bayerische Layer deckt nur den Alpenraum ab, nicht das gesamte Bundesland.</p>
+    <p class="after-note">Der Layer deckt den Alpenraum ab. Bei großen Regionen wie Bayern, Auvergne-Rhône-Alpes oder Piemont liegt nur der Teil im Layer, in dem es Hänge ab 30 Grad gibt.</p>
 
-    <p class="after-note">Der Layer selbst ist ein abgeleitetes Werk dieser Daten. Aus dem Höhenmodell wurde die Hangneigung berechnet, in fünf Klassen eingeteilt, vektorisiert und in das Garmin-Kartenformat überführt. Er wird kostenlos weitergegeben und ist ein Hilfsmittel zur Geländebeurteilung, das weder den Lawinenlagebericht noch eine Ausbildung in Lawinenkunde ersetzt.</p>
+    <p class="after-note">Die Verwaltungsgrenzen der Karte auf der Startseite stammen von <a href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoBoundaries</a> (Lizenz CC BY 4.0; für Liechtenstein: Open Database License 1.0).</p>
+
+    <p class="after-note">Der Layer selbst ist ein abgeleitetes Werk dieser Daten. Aus den Neigungskarten wurden fünf Klassen herausgelöst, vektorisiert und in das Garmin-Kartenformat überführt. Er wird kostenlos weitergegeben und ist ein Hilfsmittel zur Geländebeurteilung, das weder den Lawinenlagebericht noch eine Ausbildung in Lawinenkunde ersetzt.</p>
   </div>
 </section>
 </main>
@@ -446,7 +398,7 @@ footer{padding:46px 0 34px;background:var(--sand-sunken);}
   <div class="wrap">
     <div class="footer-bottom">
       <p>Hangneigungslayer für Garmin Uhren</p>
-      <p><a href="index.html">Zurück zur Karte</a></p>
+      <p><a href="impressum.html">Impressum, Haftung &amp; Datenschutz</a> · <a href="index.html">Zurück zur Karte</a></p>
     </div>
   </div>
 </footer>

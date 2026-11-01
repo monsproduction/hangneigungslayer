@@ -1,0 +1,4 @@
+Schriften dieser Website, lokal ausgeliefert (kein Abruf bei Google).
+Archivo, Source Sans 3, IBM Plex Mono - jeweils unter der SIL Open Font License 1.1
+(https://openfontlicense.org). Bezogen als woff2 ueber Google Fonts, nur die Zeichensaetze
+latin und latin-ext. fonts.css bindet sie ein.

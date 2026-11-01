@@ -65,6 +65,7 @@ OUT = HERE.parent
 HOME_URL = "__PENDING_HOME__"
 INFO_URL = "__PENDING_INFO__"
 BEISPIELE_URL = "__PENDING_BEISPIELE__"
+IMPRESSUM_URL = "impressum.html"
 
 URLS = HERE / "urls.json"
 if URLS.exists():
@@ -72,6 +73,7 @@ if URLS.exists():
     HOME_URL = _u.get("home", HOME_URL)
     INFO_URL = _u.get("info", INFO_URL)
     BEISPIELE_URL = _u.get("beispiele", BEISPIELE_URL)
+    IMPRESSUM_URL = _u.get("impressum", IMPRESSUM_URL)
 
 # Kontaktadresse. Steht bewusst nur hier, damit ein spaeterer Wechsel (etwa auf
 # eine eigene Domain) eine einzige Aenderung ist und nicht sechs im Template.
@@ -86,6 +88,7 @@ def _mailto(betreff):
 
 MAILTO = {
     "__MAIL_ADRESSE__": MAIL_ADRESSE,
+    "__PAYPAL_URL__": "https://www.paypal.com/paypalme/AlexanderTombrink",
     "__MAILTO_ALLGEMEIN__": _mailto("Feedback zum Hangneigungslayer"),
     "__MAILTO_FEHLER__": _mailto("Fehler melden: "),
     "__MAILTO_REGION__": _mailto("Regionsvorschlag: "),
@@ -100,6 +103,7 @@ def build(template_name, out_name, extra=None):
     out = out.replace("__HOME_URL__", HOME_URL)
     out = out.replace("__INFO_URL__", INFO_URL)
     out = out.replace("__BEISPIELE_URL__", BEISPIELE_URL)
+    out = out.replace("__IMPRESSUM_URL__", IMPRESSUM_URL)
     for key, value in MAILTO.items():
         out = out.replace(key, value)
     for key, value in (extra or {}).items():
@@ -120,6 +124,15 @@ def main():
         region["d"] = aufgeblasene_region(region["d"])
     country_outlines = json.loads((HERE / "country_outlines.json").read_text())
     downloads = json.loads((HERE / "downloads.json").read_text())
+
+    # Zerlegte Regionen (siehe make_map_parts_v1.py): Die Karte zeichnet dort die
+    # Teile statt der ganzen Region. Der ganze Pfad wird deshalb nicht mehr
+    # gebraucht und aus der Seite genommen; Name, Land und ISO bleiben fuer die Suche.
+    parts_pfad = HERE / "map_parts.json"
+    map_parts = json.loads(parts_pfad.read_text())["regionen"] if parts_pfad.exists() else {}
+    for region in map_data["regions"]:
+        if f"{region['iso']}|{region['name']}" in map_parts:
+            region["d"] = ""
     build(
         "index_template.html",
         "index.html",
@@ -127,10 +140,12 @@ def main():
             "__MAP_DATA_JSON__": json.dumps(map_data, ensure_ascii=False),
             "__COUNTRY_OUTLINES_JSON__": json.dumps(country_outlines, ensure_ascii=False),
             "__DOWNLOADS_JSON__": json.dumps(downloads, ensure_ascii=False),
+            "__MAP_PARTS_JSON__": json.dumps(map_parts, ensure_ascii=False),
         },
     )
     build("info_template.html", "info.html")
     build("beispiele_template.html", "beispiele.html")
+    build("impressum_template.html", "impressum.html")
 
 
 if __name__ == "__main__":

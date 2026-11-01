@@ -1,0 +1,907 @@
+{
+ "_herkunft": "Zerlegung grosser Regionen in je 10 Teile, wie sie mbtiles_to_garmin_v11.py beim Export der 5-m-Layer berechnet hat. Die Rechtecke stammen aus dem DRY_RUN vom 22.10.2026 (Quelle SACM_Alps_MaxZoom15.mbtiles, TEILUNG_AB_KACHELN=10000, TEILUNG_ANZAHL=10) und sind auf 0,01 Grad gerundet; das sind auf der Karte unter einem Bildpunkt. Geprueft: Die Kachelzahl aller 110 Teile stimmt mit dem batch_log.txt des Exports (garmin_layers-5m) ueberein, 0 Abweichungen. Die Nummerierung ist die der Dateinamen (Teil 01 = ..._Teil_01.img), West nach Ost, bei gleicher Lage Nord zuerst.",
+ "regionen": {
+  "AUT|Kärnten": [
+   {
+    "nr": 1,
+    "kacheln": 1450,
+    "west": 12.63,
+    "ost": 13.24,
+    "sued": 46.85,
+    "nord": 47.14
+   },
+   {
+    "nr": 2,
+    "kacheln": 1480,
+    "west": 12.63,
+    "ost": 13.24,
+    "sued": 46.36,
+    "nord": 46.85
+   },
+   {
+    "nr": 3,
+    "kacheln": 1458,
+    "west": 13.24,
+    "ost": 13.55,
+    "sued": 46.7,
+    "nord": 47.14
+   },
+   {
+    "nr": 4,
+    "kacheln": 1444,
+    "west": 13.24,
+    "ost": 13.93,
+    "sued": 46.36,
+    "nord": 46.7
+   },
+   {
+    "nr": 5,
+    "kacheln": 1426,
+    "west": 13.55,
+    "ost": 13.93,
+    "sued": 46.7,
+    "nord": 47.14
+   },
+   {
+    "nr": 6,
+    "kacheln": 1443,
+    "west": 13.93,
+    "ost": 14.35,
+    "sued": 46.75,
+    "nord": 47.14
+   },
+   {
+    "nr": 7,
+    "kacheln": 1459,
+    "west": 13.93,
+    "ost": 14.35,
+    "sued": 46.36,
+    "nord": 46.75
+   },
+   {
+    "nr": 8,
+    "kacheln": 1460,
+    "west": 14.35,
+    "ost": 14.69,
+    "sued": 46.66,
+    "nord": 47.14
+   },
+   {
+    "nr": 9,
+    "kacheln": 1449,
+    "west": 14.35,
+    "ost": 15.08,
+    "sued": 46.36,
+    "nord": 46.66
+   },
+   {
+    "nr": 10,
+    "kacheln": 1485,
+    "west": 14.69,
+    "ost": 15.08,
+    "sued": 46.66,
+    "nord": 47.14
+   }
+  ],
+  "AUT|Salzburg": [
+   {
+    "nr": 1,
+    "kacheln": 1151,
+    "west": 12.06,
+    "ost": 12.67,
+    "sued": 46.94,
+    "nord": 47.26
+   },
+   {
+    "nr": 2,
+    "kacheln": 1116,
+    "west": 12.06,
+    "ost": 12.7,
+    "sued": 47.26,
+    "nord": 47.98
+   },
+   {
+    "nr": 3,
+    "kacheln": 1150,
+    "west": 12.67,
+    "ost": 13.13,
+    "sued": 46.94,
+    "nord": 47.26
+   },
+   {
+    "nr": 4,
+    "kacheln": 1123,
+    "west": 12.7,
+    "ost": 13.13,
+    "sued": 47.47,
+    "nord": 47.98
+   },
+   {
+    "nr": 5,
+    "kacheln": 1096,
+    "west": 12.7,
+    "ost": 13.13,
+    "sued": 47.26,
+    "nord": 47.47
+   },
+   {
+    "nr": 6,
+    "kacheln": 1156,
+    "west": 13.13,
+    "ost": 13.32,
+    "sued": 47.43,
+    "nord": 47.98
+   },
+   {
+    "nr": 7,
+    "kacheln": 1126,
+    "west": 13.13,
+    "ost": 13.58,
+    "sued": 46.94,
+    "nord": 47.26
+   },
+   {
+    "nr": 8,
+    "kacheln": 1121,
+    "west": 13.13,
+    "ost": 14.02,
+    "sued": 47.26,
+    "nord": 47.43
+   },
+   {
+    "nr": 9,
+    "kacheln": 1102,
+    "west": 13.32,
+    "ost": 14.02,
+    "sued": 47.43,
+    "nord": 47.98
+   },
+   {
+    "nr": 10,
+    "kacheln": 1151,
+    "west": 13.58,
+    "ost": 14.02,
+    "sued": 46.94,
+    "nord": 47.26
+   }
+  ],
+  "AUT|Steiermark": [
+   {
+    "nr": 1,
+    "kacheln": 2160,
+    "west": 13.55,
+    "ost": 14.06,
+    "sued": 47.3,
+    "nord": 47.84
+   },
+   {
+    "nr": 2,
+    "kacheln": 2123,
+    "west": 13.55,
+    "ost": 14.36,
+    "sued": 46.63,
+    "nord": 47.3
+   },
+   {
+    "nr": 3,
+    "kacheln": 2150,
+    "west": 14.06,
+    "ost": 14.56,
+    "sued": 47.3,
+    "nord": 47.84
+   },
+   {
+    "nr": 4,
+    "kacheln": 2152,
+    "west": 14.36,
+    "ost": 14.95,
+    "sued": 46.63,
+    "nord": 47.3
+   },
+   {
+    "nr": 5,
+    "kacheln": 2185,
+    "west": 14.56,
+    "ost": 14.95,
+    "sued": 47.3,
+    "nord": 47.84
+   },
+   {
+    "nr": 6,
+    "kacheln": 2163,
+    "west": 14.95,
+    "ost": 15.27,
+    "sued": 46.63,
+    "nord": 47.25
+   },
+   {
+    "nr": 7,
+    "kacheln": 2127,
+    "west": 14.95,
+    "ost": 15.28,
+    "sued": 47.25,
+    "nord": 47.84
+   },
+   {
+    "nr": 8,
+    "kacheln": 2140,
+    "west": 15.27,
+    "ost": 16.15,
+    "sued": 46.63,
+    "nord": 47.25
+   },
+   {
+    "nr": 9,
+    "kacheln": 2110,
+    "west": 15.28,
+    "ost": 16.15,
+    "sued": 47.49,
+    "nord": 47.84
+   },
+   {
+    "nr": 10,
+    "kacheln": 2147,
+    "west": 15.28,
+    "ost": 16.15,
+    "sued": 47.25,
+    "nord": 47.49
+   }
+  ],
+  "AUT|Tirol": [
+   {
+    "nr": 1,
+    "kacheln": 2020,
+    "west": 10.07,
+    "ost": 10.66,
+    "sued": 47.11,
+    "nord": 47.75
+   },
+   {
+    "nr": 2,
+    "kacheln": 2067,
+    "west": 10.07,
+    "ost": 10.8,
+    "sued": 46.64,
+    "nord": 47.11
+   },
+   {
+    "nr": 3,
+    "kacheln": 2024,
+    "west": 10.66,
+    "ost": 11.54,
+    "sued": 47.3,
+    "nord": 47.75
+   },
+   {
+    "nr": 4,
+    "kacheln": 2050,
+    "west": 10.66,
+    "ost": 11.54,
+    "sued": 47.11,
+    "nord": 47.3
+   },
+   {
+    "nr": 5,
+    "kacheln": 2063,
+    "west": 10.8,
+    "ost": 11.54,
+    "sued": 46.64,
+    "nord": 47.11
+   },
+   {
+    "nr": 6,
+    "kacheln": 2051,
+    "west": 11.54,
+    "ost": 11.89,
+    "sued": 47.11,
+    "nord": 47.75
+   },
+   {
+    "nr": 7,
+    "kacheln": 2015,
+    "west": 11.54,
+    "ost": 12.45,
+    "sued": 46.64,
+    "nord": 47.11
+   },
+   {
+    "nr": 8,
+    "kacheln": 2044,
+    "west": 11.89,
+    "ost": 12.24,
+    "sued": 47.11,
+    "nord": 47.75
+   },
+   {
+    "nr": 9,
+    "kacheln": 1983,
+    "west": 12.24,
+    "ost": 12.99,
+    "sued": 47.11,
+    "nord": 47.75
+   },
+   {
+    "nr": 10,
+    "kacheln": 2063,
+    "west": 12.45,
+    "ost": 12.99,
+    "sued": 46.64,
+    "nord": 47.11
+   }
+  ],
+  "CHE|Graubünden": [
+   {
+    "nr": 1,
+    "kacheln": 1149,
+    "west": 8.64,
+    "ost": 9.11,
+    "sued": 46.6,
+    "nord": 47.08
+   },
+   {
+    "nr": 2,
+    "kacheln": 1174,
+    "west": 8.64,
+    "ost": 9.25,
+    "sued": 46.16,
+    "nord": 46.6
+   },
+   {
+    "nr": 3,
+    "kacheln": 1167,
+    "west": 9.11,
+    "ost": 9.65,
+    "sued": 46.78,
+    "nord": 47.08
+   },
+   {
+    "nr": 4,
+    "kacheln": 1176,
+    "west": 9.11,
+    "ost": 9.65,
+    "sued": 46.6,
+    "nord": 46.78
+   },
+   {
+    "nr": 5,
+    "kacheln": 1150,
+    "west": 9.25,
+    "ost": 9.65,
+    "sued": 46.16,
+    "nord": 46.6
+   },
+   {
+    "nr": 6,
+    "kacheln": 1141,
+    "west": 9.65,
+    "ost": 9.87,
+    "sued": 46.63,
+    "nord": 47.08
+   },
+   {
+    "nr": 7,
+    "kacheln": 1160,
+    "west": 9.65,
+    "ost": 9.96,
+    "sued": 46.16,
+    "nord": 46.63
+   },
+   {
+    "nr": 8,
+    "kacheln": 1123,
+    "west": 9.87,
+    "ost": 10.51,
+    "sued": 46.79,
+    "nord": 47.08
+   },
+   {
+    "nr": 9,
+    "kacheln": 1157,
+    "west": 9.87,
+    "ost": 10.51,
+    "sued": 46.63,
+    "nord": 46.79
+   },
+   {
+    "nr": 10,
+    "kacheln": 1138,
+    "west": 9.96,
+    "ost": 10.51,
+    "sued": 46.16,
+    "nord": 46.63
+   }
+  ],
+  "FRA|Auvergne-Rhône-Alpes": [
+   {
+    "nr": 1,
+    "kacheln": 2763,
+    "west": 4.97,
+    "ost": 5.52,
+    "sued": 44.67,
+    "nord": 45.33
+   },
+   {
+    "nr": 2,
+    "kacheln": 2733,
+    "west": 4.97,
+    "ost": 5.52,
+    "sued": 44.1,
+    "nord": 44.67
+   },
+   {
+    "nr": 3,
+    "kacheln": 2730,
+    "west": 4.97,
+    "ost": 6.31,
+    "sued": 45.62,
+    "nord": 46.42
+   },
+   {
+    "nr": 4,
+    "kacheln": 2762,
+    "west": 4.97,
+    "ost": 6.31,
+    "sued": 45.33,
+    "nord": 45.62
+   },
+   {
+    "nr": 5,
+    "kacheln": 2750,
+    "west": 5.52,
+    "ost": 6.14,
+    "sued": 44.95,
+    "nord": 45.33
+   },
+   {
+    "nr": 6,
+    "kacheln": 2769,
+    "west": 5.52,
+    "ost": 7.21,
+    "sued": 44.1,
+    "nord": 44.95
+   },
+   {
+    "nr": 7,
+    "kacheln": 2754,
+    "west": 6.14,
+    "ost": 7.21,
+    "sued": 44.95,
+    "nord": 45.33
+   },
+   {
+    "nr": 8,
+    "kacheln": 2801,
+    "west": 6.31,
+    "ost": 7.21,
+    "sued": 45.98,
+    "nord": 46.42
+   },
+   {
+    "nr": 9,
+    "kacheln": 2740,
+    "west": 6.31,
+    "ost": 7.21,
+    "sued": 45.62,
+    "nord": 45.98
+   },
+   {
+    "nr": 10,
+    "kacheln": 2750,
+    "west": 6.31,
+    "ost": 7.21,
+    "sued": 45.33,
+    "nord": 45.62
+   }
+  ],
+  "FRA|Provence-Alpes-Côte d'Azur": [
+   {
+    "nr": 1,
+    "kacheln": 2902,
+    "west": 4.97,
+    "ost": 5.78,
+    "sued": 43.48,
+    "nord": 44.02
+   },
+   {
+    "nr": 2,
+    "kacheln": 2892,
+    "west": 4.97,
+    "ost": 6.01,
+    "sued": 44.25,
+    "nord": 45.14
+   },
+   {
+    "nr": 3,
+    "kacheln": 2912,
+    "west": 4.97,
+    "ost": 6.36,
+    "sued": 44.02,
+    "nord": 44.25
+   },
+   {
+    "nr": 4,
+    "kacheln": 2907,
+    "west": 5.78,
+    "ost": 6.36,
+    "sued": 43.48,
+    "nord": 44.02
+   },
+   {
+    "nr": 5,
+    "kacheln": 2870,
+    "west": 6.01,
+    "ost": 6.36,
+    "sued": 44.25,
+    "nord": 45.14
+   },
+   {
+    "nr": 6,
+    "kacheln": 2981,
+    "west": 6.36,
+    "ost": 6.65,
+    "sued": 44.21,
+    "nord": 45.14
+   },
+   {
+    "nr": 7,
+    "kacheln": 2902,
+    "west": 6.36,
+    "ost": 6.88,
+    "sued": 43.48,
+    "nord": 44.01
+   },
+   {
+    "nr": 8,
+    "kacheln": 2916,
+    "west": 6.36,
+    "ost": 7.73,
+    "sued": 44.01,
+    "nord": 44.21
+   },
+   {
+    "nr": 9,
+    "kacheln": 2911,
+    "west": 6.65,
+    "ost": 7.73,
+    "sued": 44.21,
+    "nord": 45.14
+   },
+   {
+    "nr": 10,
+    "kacheln": 2947,
+    "west": 6.88,
+    "ost": 7.73,
+    "sued": 43.48,
+    "nord": 44.01
+   }
+  ],
+  "ITA|Lombardia": [
+   {
+    "nr": 1,
+    "kacheln": 1587,
+    "west": 8.54,
+    "ost": 9.28,
+    "sued": 45.46,
+    "nord": 45.92
+   },
+   {
+    "nr": 2,
+    "kacheln": 1610,
+    "west": 8.54,
+    "ost": 9.33,
+    "sued": 45.92,
+    "nord": 46.65
+   },
+   {
+    "nr": 3,
+    "kacheln": 1574,
+    "west": 9.28,
+    "ost": 9.91,
+    "sued": 45.46,
+    "nord": 45.92
+   },
+   {
+    "nr": 4,
+    "kacheln": 1610,
+    "west": 9.33,
+    "ost": 9.91,
+    "sued": 46.16,
+    "nord": 46.65
+   },
+   {
+    "nr": 5,
+    "kacheln": 1613,
+    "west": 9.33,
+    "ost": 9.91,
+    "sued": 45.92,
+    "nord": 46.16
+   },
+   {
+    "nr": 6,
+    "kacheln": 1585,
+    "west": 9.91,
+    "ost": 10.27,
+    "sued": 46.14,
+    "nord": 46.65
+   },
+   {
+    "nr": 7,
+    "kacheln": 1610,
+    "west": 9.91,
+    "ost": 10.33,
+    "sued": 45.46,
+    "nord": 45.93
+   },
+   {
+    "nr": 8,
+    "kacheln": 1562,
+    "west": 9.91,
+    "ost": 10.85,
+    "sued": 45.93,
+    "nord": 46.14
+   },
+   {
+    "nr": 9,
+    "kacheln": 1586,
+    "west": 10.27,
+    "ost": 10.85,
+    "sued": 46.14,
+    "nord": 46.65
+   },
+   {
+    "nr": 10,
+    "kacheln": 1560,
+    "west": 10.33,
+    "ost": 10.85,
+    "sued": 45.46,
+    "nord": 45.93
+   }
+  ],
+  "ITA|Piemonte": [
+   {
+    "nr": 1,
+    "kacheln": 1715,
+    "west": 6.61,
+    "ost": 7.14,
+    "sued": 44.88,
+    "nord": 45.24
+   },
+   {
+    "nr": 2,
+    "kacheln": 1744,
+    "west": 6.61,
+    "ost": 7.14,
+    "sued": 44.05,
+    "nord": 44.88
+   },
+   {
+    "nr": 3,
+    "kacheln": 1711,
+    "west": 7.14,
+    "ost": 7.29,
+    "sued": 44.28,
+    "nord": 45.24
+   },
+   {
+    "nr": 4,
+    "kacheln": 1701,
+    "west": 6.61,
+    "ost": 8.02,
+    "sued": 45.48,
+    "nord": 46.48
+   },
+   {
+    "nr": 5,
+    "kacheln": 1720,
+    "west": 6.61,
+    "ost": 8.02,
+    "sued": 45.24,
+    "nord": 45.48
+   },
+   {
+    "nr": 6,
+    "kacheln": 1718,
+    "west": 7.14,
+    "ost": 8.75,
+    "sued": 44.05,
+    "nord": 44.28
+   },
+   {
+    "nr": 7,
+    "kacheln": 1673,
+    "west": 7.29,
+    "ost": 8.75,
+    "sued": 44.28,
+    "nord": 45.24
+   },
+   {
+    "nr": 8,
+    "kacheln": 1697,
+    "west": 8.02,
+    "ost": 8.75,
+    "sued": 46.09,
+    "nord": 46.48
+   },
+   {
+    "nr": 9,
+    "kacheln": 1731,
+    "west": 8.02,
+    "ost": 8.75,
+    "sued": 45.85,
+    "nord": 46.09
+   },
+   {
+    "nr": 10,
+    "kacheln": 1724,
+    "west": 8.02,
+    "ost": 8.75,
+    "sued": 45.24,
+    "nord": 45.85
+   }
+  ],
+  "ITA|Trentino-Alto Adige": [
+   {
+    "nr": 1,
+    "kacheln": 2073,
+    "west": 10.36,
+    "ost": 10.91,
+    "sued": 45.66,
+    "nord": 46.2
+   },
+   {
+    "nr": 2,
+    "kacheln": 2075,
+    "west": 10.36,
+    "ost": 11.26,
+    "sued": 46.66,
+    "nord": 47.11
+   },
+   {
+    "nr": 3,
+    "kacheln": 2056,
+    "west": 10.36,
+    "ost": 11.26,
+    "sued": 46.45,
+    "nord": 46.66
+   },
+   {
+    "nr": 4,
+    "kacheln": 2101,
+    "west": 10.36,
+    "ost": 11.26,
+    "sued": 46.2,
+    "nord": 46.45
+   },
+   {
+    "nr": 5,
+    "kacheln": 2029,
+    "west": 10.91,
+    "ost": 11.26,
+    "sued": 45.66,
+    "nord": 46.2
+   },
+   {
+    "nr": 6,
+    "kacheln": 2063,
+    "west": 11.26,
+    "ost": 11.62,
+    "sued": 46.54,
+    "nord": 47.11
+   },
+   {
+    "nr": 7,
+    "kacheln": 2046,
+    "west": 11.62,
+    "ost": 11.98,
+    "sued": 46.54,
+    "nord": 47.11
+   },
+   {
+    "nr": 8,
+    "kacheln": 2057,
+    "west": 11.26,
+    "ost": 12.49,
+    "sued": 46.26,
+    "nord": 46.54
+   },
+   {
+    "nr": 9,
+    "kacheln": 2096,
+    "west": 11.26,
+    "ost": 12.49,
+    "sued": 45.66,
+    "nord": 46.26
+   },
+   {
+    "nr": 10,
+    "kacheln": 2036,
+    "west": 11.98,
+    "ost": 12.49,
+    "sued": 46.54,
+    "nord": 47.11
+   }
+  ],
+  "ITA|Veneto": [
+   {
+    "nr": 1,
+    "kacheln": 1093,
+    "west": 10.67,
+    "ost": 11.1,
+    "sued": 45.4,
+    "nord": 45.7
+   },
+   {
+    "nr": 2,
+    "kacheln": 1066,
+    "west": 10.67,
+    "ost": 11.73,
+    "sued": 45.83,
+    "nord": 46.69
+   },
+   {
+    "nr": 3,
+    "kacheln": 1087,
+    "west": 10.67,
+    "ost": 11.92,
+    "sued": 45.7,
+    "nord": 45.83
+   },
+   {
+    "nr": 4,
+    "kacheln": 1084,
+    "west": 11.1,
+    "ost": 11.92,
+    "sued": 45.4,
+    "nord": 45.7
+   },
+   {
+    "nr": 5,
+    "kacheln": 1075,
+    "west": 11.73,
+    "ost": 11.92,
+    "sued": 45.83,
+    "nord": 46.69
+   },
+   {
+    "nr": 6,
+    "kacheln": 1065,
+    "west": 11.92,
+    "ost": 12.15,
+    "sued": 46.23,
+    "nord": 46.69
+   },
+   {
+    "nr": 7,
+    "kacheln": 1093,
+    "west": 11.92,
+    "ost": 12.76,
+    "sued": 46.07,
+    "nord": 46.23
+   },
+   {
+    "nr": 8,
+    "kacheln": 1068,
+    "west": 11.92,
+    "ost": 12.76,
+    "sued": 45.4,
+    "nord": 46.07
+   },
+   {
+    "nr": 9,
+    "kacheln": 1083,
+    "west": 12.15,
+    "ost": 12.76,
+    "sued": 46.5,
+    "nord": 46.69
+   },
+   {
+    "nr": 10,
+    "kacheln": 1060,
+    "west": 12.15,
+    "ost": 12.76,
+    "sued": 46.23,
+    "nord": 46.5
+   }
+  ]
+ }
+}
